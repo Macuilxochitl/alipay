@@ -16,6 +16,7 @@
 * [交易查询](#alipay.trade.precreate)
 * [交易取消](#alipay.trade.precreate)
 * [退款](#alipay.trade.refund)
+* [统一退款查询](#alipay.trade.fastpay.refund.query)
 * [单笔转账到支付宝账户接口](#alipay.fund.trans.toaccount.transfer)
 * [查询转账订单接口](#alipay.fund.trans.order.query)
 * [ISV集成/生成app_auth_code](#alipay.open.auth.token.app)
@@ -121,7 +122,7 @@ alipay.api_alipay_trade_page_pay(
 
 ```python
     # 手机网站支付，需要跳转到https://openapi.alipay.com/gateway.do? + order_string
-    order_string = alipay.alipay_trade_wap_pay(
+    order_string = alipay.api_alipay_trade_wap_pay(
         out_trade_no="20161112",
         total_amount="0.01",
         subject=subject,
@@ -256,6 +257,22 @@ if result["code"] == "10000":
     print("success")
 ```
 
+#### <a name="alipay.trade.fastpay.refund.query"></a>统一退款查询[alipay.trade.fastpay.refund.query](https://docs.open.alipay.com/api_1/alipay.trade.fastpay.refund.query)
+
+```python
+result = alipay.api_alipay_trade_fastpay_refund_query("20171120", out_trade_no="20171120")
+
+result = {
+    'code': '10000', 
+    'msg': 'Success', 
+    'out_request_no': '20171120', 
+    'out_trade_no': '20171120', 
+    'refund_amount': '20.00', 
+    'total_amount': '20.00', 
+    'trade_no': '2017112021001004070200297107'
+}
+```
+
 #### <a name="alipay.fund.trans.toaccount.transfer"></a>单笔转账到支付宝账户接口 [alipay.fund.trans.toaccount.transfer](https://docs.open.alipay.com/api_28/alipay.fund.trans.toaccount.transfer)
 ```python
     # transfer money to alipay account
@@ -323,8 +340,19 @@ alipay = AliPay(..., debug=True)
 * John60676
 * EveryIsNormal 
 * varwey
+* Macuilxochitl
 
 ## Changelog
+
+#### 2017-12-04(version 1.5.1)
+* bug fix for `ISVAlipay.build_body`.
+
+#### 2017-11-20(version 1.5)
+* `alipay.trade.fastpay.refund.query` 统一收单交易退款查询
+
+#### 2017-11-14(version 1.4.1)
+* 修复忘记将notify url 传入`api_alipay_trade_precreate`的bug.
+
 #### 2017-10-20(version 1.4.0)
 * 将加密库依赖更新到pycryptodome，旧版用户请卸载pycrypto后安装使用.
 
@@ -346,5 +374,5 @@ alipay = AliPay(..., debug=True)
 
 ### 2017-05-26 (version 1.0)
 * 后台全部重构，对各种接口重命名。
-* 使用新版的`电脑网站支付接口`，不再`支持即使到帐`接口
+* 使用新版的`电脑网站支付接口`，不再`支持即时到帐`接口
 * 将key重文件读出后放到内存，避免每次签名都需要访问文件。

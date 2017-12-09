@@ -15,7 +15,7 @@ from .compat import quote_plus, urlopen, decodebytes, encodebytes, b
 from .exceptions import AliPayException, AliPayValidationError
 
 
-class BaseAliPay():
+class BaseAliPay(object):
     @property
     def appid(self):
         return self._appid
@@ -58,7 +58,7 @@ class BaseAliPay():
           sign_type="RSA2"
         )
         """
-        self._appid = appid
+        self._appid = str(appid)
         self._app_notify_url = app_notify_url
         self._app_private_key_path = app_private_key_path
         self._alipay_public_key_path = alipay_public_key_path
@@ -429,6 +429,26 @@ class BaseAliPay():
         raw_string = urlopen(url, timeout=15).read().decode("utf-8")
         return self._verify_and_return_sync_response(raw_string, "alipay_trade_precreate_response")
 
+    def api_alipay_trade_fastpay_refund_query(
+        self, out_request_no, trade_no=None, out_trade_no=None
+    ):
+        assert (out_trade_no is not None) or (trade_no is not None),\
+            "Both trade_no and out_trade_no are None"
+
+        biz_content = {"out_request_no": out_request_no}
+        if trade_no:
+            biz_content["trade_no"] = trade_no
+        else:
+            biz_content["out_trade_no"] = out_trade_no
+
+        data = self.build_body("alipay.trade.fastpay.refund.query", biz_content)
+
+        url = self._gateway + "?" + self.sign_data(data)
+        raw_string = urlopen(url, timeout=15).read().decode("utf-8")
+        return self._verify_and_return_sync_response(
+            raw_string, "alipay_trade_fastpay_refund_query_response"
+        )
+
     def api_alipay_fund_trans_toaccount_transfer(
             self, out_biz_no, payee_type, payee_account, amount, **kwargs
     ):
@@ -552,9 +572,12 @@ class ISVAliPay(BaseAliPay):
             raise Exception("Get auth token by auth code failed: {}".format(self._app_auth_code))
         return self._app_auth_token
 
-    def build_body(self, method, biz_content, return_url=None, append_auth_token=True):
-
-        return super(ISVAliPay, self).build_body(method, biz_content, return_url, append_auth_token)
+    def build_body(
+        self, method, biz_content, return_url=None, notify_url=None, append_auth_token=True
+    ):
+        return super(ISVAliPay, self).build_body(
+            method, biz_content, return_url, notify_url, append_auth_token
+        )
 
     def api_alipay_open_auth_token_app(self, refresh_token=None):
         """
